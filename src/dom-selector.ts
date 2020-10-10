@@ -173,8 +173,12 @@ export const run = (
     }))
     //过滤掉日期晚于今天的
     .filter((item) => moment(new Date()).isAfter(moment(item.date)))
-    //过滤缓存中已存在的
-    .filter((item) => !cache[moment(item.date).format('yyyy.MM.DD')])
+    //过滤时间正常的
+    .filter(
+      (item) =>
+        !cache[moment(item.date).format('yyyy.MM.DD')] ||
+        getDuration(cache[moment(item.date).format('yyyy.MM.DD')]) === 0
+    )
     //转换成异步逻辑
     .map((item) => {
       debug('log', `注册日期 ${item.date}`);
@@ -221,10 +225,7 @@ export const run = (
           }
         }),
         tap((item) => {
-          //工作时长?0 的才进入,免得最近的几天因为还没有开始统计直接进入缓存导致后续无法更新
-          if (getDuration(item)) {
-            cache[moment(item.date).format('yyyy.MM.DD')] = item;
-          }
+          cache[moment(item.date).format('yyyy.MM.DD')] = item;
         })
       );
     });
