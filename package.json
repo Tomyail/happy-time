@@ -1,0 +1,36 @@
+{
+  "name": "@tomyail/happy-time",
+  "version": "1.2.9",
+  "source": "src/index.ts",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.module.js",
+  "unpkg": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@types/jest": "^26.0.14",
+    "@types/luxon": "^1.25.0",
+    "date-fns": "^2.16.1",
+    "luxon": "^1.25.0",
+    "moment": "^2.29.0",
+    "rxjs": "^6.6.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-typescript": "^7.10.4",
+    "babel-jest": "^26.3.0",
+    "jest": "^26.4.2",
+    "microbundle": "^0.12.4",
+    "typescript": "^4.0.3"
+  },
+  "scripts": {
+    "prepack": "yarn build",
+    "test": "jest",
+    "build": "microbundle --tsconfig tsconfig.lib.json --no-compress --globals rxjs/operators=rxjs.operators ",
+    "dev": "microbundle watch --tsconfig tsconfig.lib.json"
+  }
+}
