@@ -32,7 +32,7 @@
 // @require https://unpkg.com/@reactivex/rxjs@6.6.3/dist/global/rxjs.umd.js
 // @require https://code.jquery.com/jquery-1.9.1.min.js
 // @require https://cdn.jsdelivr.net/npm/moment@2.29.0/moment.min.js
-// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.2.9/dist/index.umd.js
+// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.2.10/dist/index.umd.js
 // ==/UserScript==
 
 (function () {
@@ -54,14 +54,18 @@
       `);
 
       unsafeWindow.__ehr_cache = cache;
-      unsafeWindow.__ehr_summary = (start, end) =>
-        `总工作时间(${start}-${end}): ${window.happyTime.summary(
-          Object.values(cache),
-          {
-            start: start,
-            end: end,
-          }
-        )}`;
+      unsafeWindow.__ehr_summary = (start, end) => {
+        console.table(window.happyTime.table(Object.values(cache), start, end));
+        console.log(
+          `总工作时间(${start}-${end}): ${window.happyTime.summary(
+            Object.values(cache),
+            {
+              start: start,
+              end: end,
+            }
+          )}`
+        );
+      };
 
       unsafeWindow.__ehr_predict = (
         now,

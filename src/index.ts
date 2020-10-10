@@ -7,5 +7,6 @@ export {
   getLeftWorkingDays,
   averageHoursPerDays,
   predict,
-  refreshCal
+  refreshCal,
+  table
 } from './dom-selector';

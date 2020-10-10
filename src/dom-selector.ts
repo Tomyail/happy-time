@@ -40,6 +40,22 @@ export const toReadableString = (input: ParsedData) => {
     moment(input.date).format('M.D')
   )} 工作时间 ${getDuration(input)} 小时`;
 };
+
+export const toTableData = (input: ParsedData) => {
+  const duration = getDuration(input);
+  const startTime = input.active[0]
+    ? moment(input.active[0]).format('h:mm')
+    : '无';
+  const endTime = input.active[input.active.length - 1]
+    ? moment(input.active[input.active.length - 1]).format('h:mm')
+    : '无';
+  return {
+    date: moment(input.date).format('yyyy.MM.DD'),
+    duration,
+    startTime,
+    endTime,
+  };
+};
 let ifDebug = false;
 //获取日历上面的每一天的 dom
 const getDaysFromCald = () => {
@@ -252,6 +268,14 @@ export const summary = (
 ) => {
   const filterFn = getFilterFnFromRange(range);
   return items.filter(filterFn).reduce((acc, cur) => acc + getDuration(cur), 0);
+};
+
+export const table = (
+  items: ParsedData[],
+  range?: { start: string; end: string }
+) => {
+  const filterFn = getFilterFnFromRange(range);
+  return items.filter(filterFn).map((item) => toTableData(item));
 };
 
 /**
