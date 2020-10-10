@@ -43,11 +43,9 @@ export const toReadableString = (input: ParsedData) => {
 
 export const toTableData = (input: ParsedData) => {
   const duration = getDuration(input);
-  const startTime = input.active[0]
-    ? moment(input.active[0]).format('h:mm')
-    : '无';
+  const startTime = input.active[0] ? input.active[0] : '无';
   const endTime = input.active[input.active.length - 1]
-    ? moment(input.active[input.active.length - 1]).format('h:mm')
+    ? input.active[input.active.length - 1]
     : '无';
   return {
     date: moment(input.date).format('yyyy.MM.DD'),
