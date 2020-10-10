@@ -42,10 +42,12 @@ export const toReadableString = (input: ParsedData) => {
 };
 
 export const toTableData = (input: ParsedData) => {
-  const duration = getDuration(input);
-  const startTime = input.active[0] ? input.active[0] : '无';
+  const duration = getDuration(input).toFixed(2);
+  const startTime = input.active[0]
+    ? moment(input.active[0]).format('HH:mm')
+    : '无';
   const endTime = input.active[input.active.length - 1]
-    ? input.active[input.active.length - 1]
+    ? moment(input.active[input.active.length - 1]).format('HH:mm')
     : '无';
   return {
     date: moment(input.date).format('yyyy.MM.DD'),
@@ -91,7 +93,16 @@ const getActiveRecords = (targetDate: Date) => {
       return Array.from(result ?? [])
         .map((item) => item.textContent)
         .filter((item) => item)
-        .map((item) => new Date(item!));
+        .map((item) => {
+          const d = new Date(item!);
+
+          // 原来的 toJson 时区有问题
+          d.toJSON = function () {
+            return this.toString();
+          };
+
+          return d;
+        });
     }),
     first()
   );
