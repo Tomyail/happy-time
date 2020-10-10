@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      0.10.0
+// @version      0.10.1
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
