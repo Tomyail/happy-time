@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      0.10.1
+// @version      0.11.0
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
@@ -55,7 +55,7 @@
 
       unsafeWindow.__ehr_cache = cache;
       unsafeWindow.__ehr_summary = (start, end) => {
-        console.table(window.happyTime.table(Object.values(cache), start, end));
+        console.table(window.happyTime.table(Object.values(cache), {start, end}));
         console.log(
           `总工作时间(${start}-${end}): ${window.happyTime.summary(
             Object.values(cache),
