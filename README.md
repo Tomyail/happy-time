@@ -5,6 +5,7 @@
 1. 安装 [tampermonkey](https://www.tampermonkey.net/) 插件
 2. [安装用户脚本](https://openuserjs.org/install/tomyail/EHR_Happy_Time.user.js)
 3. 打开 E_HR 系统,进入个人考勤查询系统. 点击 "Search" 按钮 脚本将会自动查询并在 [开发者工具上](https://developers.google.com/web/tools/chrome-devtools/console) 打印 **当月** 每天的上班时间
+4. 后续只要查询过有缓存数据,即使没有登录,只要在开发者工具发现`脚本已注册完毕`,依然可以获得历史统计数据
 
 ![img](img.png)
 
