@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      0.12.0
+// @version      0.13.1
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
@@ -38,6 +38,7 @@
 (function () {
   'use strict';
 
+  let isInited = false;
   setInterval(() => {
     const targetDom = document.querySelector(
       '#app_220103 > div > div.percheckq-left > div > div.flatpickr-month'
@@ -45,17 +46,23 @@
     let cache = localStorage.getItem('__ehr_cache')
       ? JSON.parse(localStorage.getItem('__ehr_cache'))
       : {};
-    if (targetDom && targetDom.children && targetDom.children.length <= 3) {
+    if (
+      ((targetDom && targetDom.children) ||
+        localStorage.getItem('__ehr_cache')) &&
+      !isInited
+    ) {
       console.log(`脚本已注册完毕\n
-      __ehr_summary("9.16","10.15");// 获取考情周期内的总工作时长\n
-      __ehr_predict("10.7",185,"9.16","10.15");// 预测剩余的考勤周期每天需要工作多久才能满足目标工作小时数(当前时间,考勤总工作数,考勤开始日期,考勤结束日期) \n
-      __ehr_predict("10.7",185,"9.16","10.15",5);// 预测函数式基于 1-5 是工作日,6,7 是周末的方式计算剩余应该工作天数的. 如果你需要自定义剩余的工作天数,最后一个参数传天数就好了(这个例子是 5 天)
-      __ehr_averageHoursPerDays("9.16","10.15");// 获取每天的平均工作小时数
-      `);
+        __ehr_summary("9.16","10.15");// 获取考情周期内的总工作时长\n
+        __ehr_predict("10.7",185,"9.16","10.15");// 预测剩余的考勤周期每天需要工作多久才能满足目标工作小时数(当前时间,考勤总工作数,考勤开始日期,考勤结束日期) \n
+        __ehr_predict("10.7",185,"9.16","10.15",5);// 预测函数式基于 1-5 是工作日,6,7 是周末的方式计算剩余应该工作天数的. 如果你需要自定义剩余的工作天数,最后一个参数传天数就好了(这个例子是 5 天)
+        __ehr_averageHoursPerDays("9.16","10.15");// 获取每天的平均工作小时数
+        `);
 
       unsafeWindow.__ehr_cache = cache;
       unsafeWindow.__ehr_summary = (start, end) => {
-        console.table(window.happyTime.table(Object.values(cache), {start, end}));
+        console.table(
+          window.happyTime.table(Object.values(cache), { start, end })
+        );
         console.log(
           `总工作时间(${start}-${end}): ${window.happyTime.summary(
             Object.values(cache),
@@ -98,6 +105,9 @@
         cache = {};
       };
 
+      isInited = true;
+    }
+    if (targetDom && targetDom.children && targetDom.children.length <= 3) {
       const btn = document.createElement('button');
       btn.innerText = 'search';
       btn.addEventListener('click', () => {
