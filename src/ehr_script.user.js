@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      0.13.2
+// @version      0.14.0
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
@@ -39,13 +39,14 @@
   'use strict';
 
   let isInited = false;
+  let cache = localStorage.getItem('__ehr_cache')
+    ? JSON.parse(localStorage.getItem('__ehr_cache'))
+    : {};
   setInterval(() => {
     const targetDom = document.querySelector(
       '#app_220103 > div > div.percheckq-left > div > div.flatpickr-month'
     );
-    let cache = localStorage.getItem('__ehr_cache')
-      ? JSON.parse(localStorage.getItem('__ehr_cache'))
-      : {};
+    
     if (
       ((targetDom && targetDom.children) ||
         localStorage.getItem('__ehr_cache')) &&
