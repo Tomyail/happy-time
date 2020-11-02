@@ -32,7 +32,7 @@
 // @require https://unpkg.com/@reactivex/rxjs@6.6.3/dist/global/rxjs.umd.js
 // @require https://code.jquery.com/jquery-1.9.1.min.js
 // @require https://cdn.jsdelivr.net/npm/moment@2.29.0/moment.min.js
-// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.2.13/dist/index.umd.js
+// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.0/dist/index.umd.js
 // ==/UserScript==
 
 (function () {
@@ -122,14 +122,19 @@
       const btn = document.createElement('button');
       btn.innerText = 'search';
       btn.addEventListener('click', () => {
-        window.happyTime.runForEHR(false, cache).subscribe(
-          (x) => console.log(window.happyTime.toReadableString(x)),
-          (x) => console.error(x),
-          () => {
-            localStorage.setItem('__ehr_cache', JSON.stringify(cache));
-            console.log(unsafeWindow.__ehr_summary());
-          }
-        );
+        window.happyTime
+          .runForEHR(false, cache, [
+            ['12:00', '13:00'],
+            ['18:30', '19:30'],
+          ])
+          .subscribe(
+            (x) => console.log(window.happyTime.toReadableString(x)),
+            (x) => console.error(x),
+            () => {
+              localStorage.setItem('__ehr_cache', JSON.stringify(cache));
+              console.log(unsafeWindow.__ehr_summary());
+            }
+          );
       });
       targetDom.append(btn);
     }

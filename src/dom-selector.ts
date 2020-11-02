@@ -35,10 +35,43 @@ export const getDuration = (input: ParsedData) => {
     .asHours();
 };
 
+//请假时间
+export const getAbsentTime = (input: ParsedData) => {
+  // 4 | 8 | 0
+  return 0;
+};
+
+//判断是否为工作日
+const isWorkingDay = (now: string, excludeDay: number[] = [6, 7]) => {
+  return excludeDay.reduce(
+    (acc, cur) => acc && moment(now, 'M.D').isoWeekday() !== cur,
+    true
+  );
+};
+
+//获取加班时间
+export const getOverTime = (input: ParsedData, workHourPerDay: number = 8) => {
+  //先确定是否是工作日
+  const _isWorkingDay = isWorkingDay(moment(input.date).format('M.D'));
+  //工作日的期望上班时间为 8 小时减去请假时间
+  //非工作日的期望上班时间是 0
+  const validWorkingHour = _isWorkingDay
+    ? workHourPerDay - getAbsentTime(input)
+    : 0;
+
+  //最终的加班时间
+  const ot = getDuration(input) - validWorkingHour;
+  if (ot > 0) {
+    return ot;
+  }
+  //加班时间<0, 大概率这一天缺勤了,而且没有请假
+  return 0;
+};
+
 export const toReadableString = (input: ParsedData) => {
   return `${moment(input.date).format('yyyy.MM.DD')} 工作日?:${isWorkingDay(
     moment(input.date).format('M.D')
-  )} 工作时间 ${getDuration(input)} 小时`;
+  )} 工作时间 ${getDuration(input)} 小时 加班时间 ${getOverTime(input)}`;
 };
 
 export const toTableData = (input: ParsedData) => {
@@ -49,11 +82,13 @@ export const toTableData = (input: ParsedData) => {
   const endTime = input.active[input.active.length - 1]
     ? moment(input.active[input.active.length - 1]).format('HH:mm')
     : '无';
+  const overTime = getOverTime(input).toFixed(2);
   return {
     date: moment(input.date).format('yyyy.MM.DD'),
     duration,
     startTime,
     endTime,
+    overTime,
   };
 };
 let ifDebug = false;
@@ -260,12 +295,6 @@ const getFilterFnFromRange = (range?: { start: string; end: string }) => {
     : (item: ParsedData) => true;
 };
 
-const isWorkingDay = (now: string, excludeDay: number[] = [6, 7]) => {
-  return excludeDay.reduce(
-    (acc, cur) => acc && moment(now, 'M.D').isoWeekday() !== cur,
-    true
-  );
-};
 /**
  * 根据一个时间段计算总加班时间(单位小时)
  * @param items
