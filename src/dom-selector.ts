@@ -45,15 +45,22 @@ const getAbsentTime = (input: ParsedData, config?: any) => {
 };
 
 //判断是否为工作日
-const isWorkingDay = (now: string, excludeDay: number[] = [6, 7]) => {
+const isWorkingDay = (
+  now: string,
+  excludeDay: number[] = [6, 7],
+  config?: any
+) => {
+  const configValue = config && config[now] && config[now]['workingHour'];
+  if (configValue) {
+    return configValue > 0;
+  }
   return excludeDay.reduce(
     (acc, cur) => acc && moment(now, 'M.D').isoWeekday() !== cur,
     true
   );
 };
 
-//获取加班时间
-export const getOverTime = (input: ParsedData, config?: any) => {
+const getExpectWorkingHour = (input: ParsedData, config?: any) => {
   const configValue =
     config &&
     config[moment(input.date).format('M.D')] &&
@@ -63,14 +70,22 @@ export const getOverTime = (input: ParsedData, config?: any) => {
     validWorkingHour = Number(configValue) - getAbsentTime(input, config);
   } else {
     //先确定是否是工作日
-    const _isWorkingDay = isWorkingDay(moment(input.date).format('M.D'));
+    const _isWorkingDay = isWorkingDay(
+      moment(input.date).format('M.D'),
+      [6, 7],
+      config
+    );
     //工作日的期望上班时间为 8 小时减去请假时间
     //非工作日的期望上班时间是 0
     validWorkingHour = _isWorkingDay ? 8 - getAbsentTime(input, config) : 0;
   }
+  return validWorkingHour;
+};
 
+//获取加班时间
+export const getOverTime = (input: ParsedData, config?: any) => {
   //最终的加班时间
-  const ot = getDuration(input) - validWorkingHour;
+  const ot = getDuration(input) - getExpectWorkingHour(input, config);
   if (ot > 0) {
     return ot;
   }
@@ -80,7 +95,9 @@ export const getOverTime = (input: ParsedData, config?: any) => {
 
 export const toReadableString = (input: ParsedData, config: any) => {
   return `${moment(input.date).format('yyyy.MM.DD')} 工作日?:${isWorkingDay(
-    moment(input.date).format('M.D')
+    moment(input.date).format('M.D'),
+    [6, 7],
+    config
   )} 工作时间 ${getDuration(input)} 小时 加班时间 ${getOverTime(
     input,
     config
@@ -96,12 +113,16 @@ export const toTableData = (input: ParsedData, config: any) => {
     ? moment(input.active[input.active.length - 1]).format('HH:mm')
     : '无';
   const overTime = getOverTime(input, config).toFixed(2);
+  moment(input.date);
   return {
-    date: moment(input.date).format('yyyy.MM.DD'),
-    duration,
-    startTime,
-    endTime,
-    overTime,
+    date: `${moment(input.date).format('yyyy.MM.DD')}-(星期${moment(
+      input.date
+    ).isoWeekday()})`, //日期
+    startTime, //开始时间
+    endTime, //结束时间
+    expectWorkingHour: getExpectWorkingHour(input, config), //期望工作时间
+    duration, //工作时长
+    overTime, //加班时间
   };
 };
 let ifDebug = false;
@@ -184,12 +205,13 @@ export const refreshCal = (cache: any, extra: any) => {
       .format('yyyy.MM.DD');
     if (cache[cacheKey]) {
       if (day.getElementsByClassName('ehr_tag').length) {
-        day.getElementsByClassName('ehr_tag')[0].textContent = getDuration(
-          cache[cacheKey]
+        day.getElementsByClassName('ehr_tag')[0].textContent = getOverTime(
+          cache[cacheKey],
+          extra
         ).toFixed(1);
       } else {
         const span = document.createElement('span');
-        span.innerText = getDuration(cache[cacheKey]).toFixed(2);
+        span.innerText = getOverTime(cache[cacheKey], extra).toFixed(1);
         span.className = 'ehr_tag';
         span.style.position = 'absolute';
         span.style.color = 'red';
@@ -390,14 +412,19 @@ export const averageHoursPerDays = (
 export const getLeftWorkingDays = (
   now: string,
   end: string,
-  excludeDay: number[] = [6, 7]
+  excludeDay: number[] = [6, 7],
+  config?: any
 ) => {
   const leftDays = moment(end, 'M.D').diff(moment(now, 'M.D'), 'days', true);
 
   let workingDays = 0;
   for (let i = 1; i <= leftDays; i++) {
     if (
-      isWorkingDay(moment(now, 'M.D').add(i, 'd').format('M.D'), excludeDay)
+      isWorkingDay(
+        moment(now, 'M.D').add(i, 'd').format('M.D'),
+        excludeDay,
+        config
+      )
     ) {
       workingDays++;
     }

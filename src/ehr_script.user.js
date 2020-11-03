@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      0.15.0
+// @version      0.16.0
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
@@ -32,12 +32,12 @@
 // @require https://unpkg.com/@reactivex/rxjs@6.6.3/dist/global/rxjs.umd.js
 // @require https://code.jquery.com/jquery-1.9.1.min.js
 // @require https://cdn.jsdelivr.net/npm/moment@2.29.0/moment.min.js
-// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.0/dist/index.umd.js
+// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.2/dist/index.umd.js
 // ==/UserScript==
 
 (function () {
   'use strict';
-
+//  http://localhost:5000/index.umd.js
   let isInited = false;
   let cache = localStorage.getItem('__ehr_cache')
     ? JSON.parse(localStorage.getItem('__ehr_cache'))
@@ -69,7 +69,7 @@
       unsafeWindow.extra_config = extra_config;
       unsafeWindow.__ehr_cache = cache;
       unsafeWindow.__ehr_set_workingHour = (date, hour) => {
-        if (hour !== 0 || hour !== 8 || !hour) {
+        if (hour !== 0 && hour !== 8 && !hour) {
           console.error('工作时间只能是 0 或者 8');
         }
 
@@ -77,10 +77,11 @@
           ...extra_config[date],
           workingHour: hour && 8,
         };
+        localStorage.setItem('__ehr_cache_extra', JSON.stringify(extra_config));
       };
 
       unsafeWindow.__ehr_set_absentHour = (date, hour) => {
-        if (hour !== 0 || hour !== 8 || hour !== 4) {
+        if (hour !== 0 && hour !== 8 && hour !== 4) {
           console.error('加班时间只能是 0,8,4');
         }
 
@@ -88,6 +89,7 @@
           ...extra_config[date],
           absentHour: hour,
         };
+        localStorage.setItem('__ehr_cache_extra', JSON.stringify(extra_config));
       };
       unsafeWindow.__ehr_summary = (start, end) => {
         if (start) {
@@ -101,7 +103,11 @@
           end = localStorage.getItem('__ehr_cache_end');
         }
         console.table(
-          window.happyTime.table(Object.values(cache), { start, end })
+          window.happyTime.table(
+            Object.values(cache),
+            { start, end },
+            extra_config
+          )
         );
         console.log(
           `总工作时间(${start}-${end}): ${window.happyTime.summary(
