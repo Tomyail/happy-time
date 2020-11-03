@@ -8,5 +8,6 @@ export {
   averageHoursPerDays,
   predict,
   refreshCal,
-  table
+  table,
+  summaryOT,
 } from './dom-selector';

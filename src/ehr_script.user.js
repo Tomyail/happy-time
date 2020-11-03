@@ -42,6 +42,10 @@
   let cache = localStorage.getItem('__ehr_cache')
     ? JSON.parse(localStorage.getItem('__ehr_cache'))
     : {};
+
+  let extra_config = localStorage.getItem('__ehr_cache_extra')
+    ? JSON.parse(localStorage.getItem('__ehr_cache_extra'))
+    : {};
   setInterval(() => {
     const targetDom = document.querySelector(
       '#app_220103 > div > div.percheckq-left > div > div.flatpickr-month'
@@ -57,9 +61,34 @@
         __ehr_predict("10.7",185,"9.16","10.15");// 预测剩余的考勤周期每天需要工作多久才能满足目标工作小时数(当前时间,考勤总工作数,考勤开始日期,考勤结束日期) \n
         __ehr_predict("10.7",185,"9.16","10.15",5);// 预测函数式基于 1-5 是工作日,6,7 是周末的方式计算剩余应该工作天数的. 如果你需要自定义剩余的工作天数,最后一个参数传天数就好了(这个例子是 5 天)
         __ehr_averageHoursPerDays("9.16","10.15");// 获取每天的平均工作小时数
+
+        __ehr_set_workingHour('10.20') //强制设置 10.20 为工作日
+        __ehr_set_absentHour('10.20',8|4|0) //设置 10.20 的请假时间为 8|4|0 小时
         `);
 
+      unsafeWindow.extra_config = extra_config;
       unsafeWindow.__ehr_cache = cache;
+      unsafeWindow.__ehr_set_workingHour = (date, hour) => {
+        if (hour !== 0 || hour !== 8 || !hour) {
+          console.error('工作时间只能是 0 或者 8');
+        }
+
+        extra_config[date] = {
+          ...extra_config[date],
+          workingHour: hour && 8,
+        };
+      };
+
+      unsafeWindow.__ehr_set_absentHour = (date, hour) => {
+        if (hour !== 0 || hour !== 8 || hour !== 4) {
+          console.error('加班时间只能是 0,8,4');
+        }
+
+        extra_config[date] = {
+          ...extra_config[date],
+          absentHour: hour,
+        };
+      };
       unsafeWindow.__ehr_summary = (start, end) => {
         if (start) {
           localStorage.setItem('__ehr_cache_start', start);
@@ -81,6 +110,14 @@
               start: start,
               end: end,
             }
+          )}`,
+          `总加班(${start}-${end}): ${window.happyTime.summaryOT(
+            Object.values(cache),
+            {
+              start: start,
+              end: end,
+            },
+            extra_config
           )}`
         );
       };
@@ -114,6 +151,7 @@
       unsafeWindow.__ehr_clearCache = () => {
         localStorage.clear();
         cache = {};
+        extra_config = {};
       };
 
       isInited = true;
@@ -123,12 +161,18 @@
       btn.innerText = 'search';
       btn.addEventListener('click', () => {
         window.happyTime
-          .runForEHR(false, cache, [
-            ['12:00', '13:00'],
-            ['18:30', '19:30'],
-          ])
+          .runForEHR(
+            false,
+            cache,
+            [
+              ['12:00', '13:00'],
+              ['18:30', '19:30'],
+            ],
+            extra_config
+          )
           .subscribe(
-            (x) => console.log(window.happyTime.toReadableString(x)),
+            (x) =>
+              console.log(window.happyTime.toReadableString(x, extra_config)),
             (x) => console.error(x),
             () => {
               localStorage.setItem('__ehr_cache', JSON.stringify(cache));
@@ -139,7 +183,7 @@
       targetDom.append(btn);
     }
     if (targetDom) {
-      window.happyTime.refreshCal(cache);
+      window.happyTime.refreshCal(cache, extra_config);
     }
   }, 1000);
 })();

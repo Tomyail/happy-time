@@ -36,9 +36,12 @@ export const getDuration = (input: ParsedData) => {
 };
 
 //请假时间
-export const getAbsentTime = (input: ParsedData) => {
-  // 4 | 8 | 0
-  return 0;
+const getAbsentTime = (input: ParsedData, config?: any) => {
+  const x =
+    config &&
+    config[moment(input.date).format('M.D')] &&
+    config[moment(input.date).format('M.D')]['absentHour'];
+  return x ?? 0;
 };
 
 //判断是否为工作日
@@ -50,14 +53,21 @@ const isWorkingDay = (now: string, excludeDay: number[] = [6, 7]) => {
 };
 
 //获取加班时间
-export const getOverTime = (input: ParsedData, workHourPerDay: number = 8) => {
-  //先确定是否是工作日
-  const _isWorkingDay = isWorkingDay(moment(input.date).format('M.D'));
-  //工作日的期望上班时间为 8 小时减去请假时间
-  //非工作日的期望上班时间是 0
-  const validWorkingHour = _isWorkingDay
-    ? workHourPerDay - getAbsentTime(input)
-    : 0;
+export const getOverTime = (input: ParsedData, config?: any) => {
+  const configValue =
+    config &&
+    config[moment(input.date).format('M.D')] &&
+    config[moment(input.date).format('M.D')]['workingHour'];
+  let validWorkingHour;
+  if (configValue) {
+    validWorkingHour = Number(configValue) - getAbsentTime(input, config);
+  } else {
+    //先确定是否是工作日
+    const _isWorkingDay = isWorkingDay(moment(input.date).format('M.D'));
+    //工作日的期望上班时间为 8 小时减去请假时间
+    //非工作日的期望上班时间是 0
+    validWorkingHour = _isWorkingDay ? 8 - getAbsentTime(input, config) : 0;
+  }
 
   //最终的加班时间
   const ot = getDuration(input) - validWorkingHour;
@@ -68,13 +78,16 @@ export const getOverTime = (input: ParsedData, workHourPerDay: number = 8) => {
   return 0;
 };
 
-export const toReadableString = (input: ParsedData) => {
+export const toReadableString = (input: ParsedData, config: any) => {
   return `${moment(input.date).format('yyyy.MM.DD')} 工作日?:${isWorkingDay(
     moment(input.date).format('M.D')
-  )} 工作时间 ${getDuration(input)} 小时 加班时间 ${getOverTime(input)}`;
+  )} 工作时间 ${getDuration(input)} 小时 加班时间 ${getOverTime(
+    input,
+    config
+  )}`;
 };
 
-export const toTableData = (input: ParsedData) => {
+export const toTableData = (input: ParsedData, config: any) => {
   const duration = getDuration(input).toFixed(2);
   const startTime = input.active[0]
     ? moment(input.active[0]).format('HH:mm')
@@ -82,7 +95,7 @@ export const toTableData = (input: ParsedData) => {
   const endTime = input.active[input.active.length - 1]
     ? moment(input.active[input.active.length - 1]).format('HH:mm')
     : '无';
-  const overTime = getOverTime(input).toFixed(2);
+  const overTime = getOverTime(input, config).toFixed(2);
   return {
     date: moment(input.date).format('yyyy.MM.DD'),
     duration,
@@ -153,7 +166,7 @@ const getActiveRecords = (targetDate: Date) => {
   ).pipe(first());
 };
 
-export const refreshCal = (cache: any) => {
+export const refreshCal = (cache: any, extra: any) => {
   const currentDateStr = document.querySelector(
     'div.percheckq-left > div > div.flatpickr-month > span.flatpickr-current-month'
   )?.textContent;
@@ -309,12 +322,24 @@ export const summary = (
   return items.filter(filterFn).reduce((acc, cur) => acc + getDuration(cur), 0);
 };
 
-export const table = (
+export const summaryOT = (
   items: ParsedData[],
-  range?: { start: string; end: string }
+  range?: { start: string; end: string },
+  config?: any
 ) => {
   const filterFn = getFilterFnFromRange(range);
-  return items.filter(filterFn).map((item) => toTableData(item));
+  return items
+    .filter(filterFn)
+    .reduce((acc, cur) => acc + getOverTime(cur, config), 0);
+};
+
+export const table = (
+  items: ParsedData[],
+  range?: { start: string; end: string },
+  config?: any
+) => {
+  const filterFn = getFilterFnFromRange(range);
+  return items.filter(filterFn).map((item) => toTableData(item, config));
 };
 
 /**
