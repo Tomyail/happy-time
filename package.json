@@ -1,6 +1,6 @@
 {
   "name": "@tomyail/happy-time",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "source": "src/index.ts",
   "license": "MIT",
   "main": "dist/index.js",
