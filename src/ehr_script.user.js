@@ -32,7 +32,7 @@
 // @require https://unpkg.com/@reactivex/rxjs@6.6.3/dist/global/rxjs.umd.js
 // @require https://code.jquery.com/jquery-1.9.1.min.js
 // @require https://cdn.jsdelivr.net/npm/moment@2.29.0/moment.min.js
-// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.2/dist/index.umd.js
+// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.3/dist/index.umd.js
 // ==/UserScript==
 
 (function () {

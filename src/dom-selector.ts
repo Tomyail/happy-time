@@ -107,10 +107,10 @@ export const toReadableString = (input: ParsedData, config: any) => {
 export const toTableData = (input: ParsedData, config: any) => {
   const duration = getDuration(input).toFixed(2);
   const startTime = input.active[0]
-    ? moment(input.active[0]).format('HH:mm')
+    ? moment(new Date(input.active[0])).format('HH:mm')
     : '无';
   const endTime = input.active[input.active.length - 1]
-    ? moment(input.active[input.active.length - 1]).format('HH:mm')
+    ? moment(new Date(input.active[input.active.length - 1])).format('HH:mm')
     : '无';
   const overTime = getOverTime(input, config).toFixed(2);
   moment(input.date);
