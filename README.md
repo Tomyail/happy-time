@@ -63,7 +63,7 @@ __ehr_clearCache();
 
 - 上班规则是什么?
 
-中午:11:30- 12:30; 晚上:18:30- 19:30 不算上班时间
+中午:12:00- 13:00; 晚上:18:30- 19:30 不算上班时间
 
 - 可以禁用缓存吗?
 
@@ -108,3 +108,10 @@ window.happyTime.runForEHR(false, false, cache).subscribe(
   }
 );
 ```
+
+- 不想脚本在任何网站都执行怎么办？
+
+点击tampermonkey插件，打开管理面板，找到EHR_Happy_Time，点右边的编辑按钮，按下图设置，填入ehr系统的网址
+
+![img](img3.png)
+
