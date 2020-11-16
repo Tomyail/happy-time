@@ -54,6 +54,7 @@ const isWorkingDay = (
   if (configValue) {
     return configValue > 0;
   }
+
   return excludeDay.reduce(
     (acc, cur) => acc && moment(now, 'M.D').isoWeekday() !== cur,
     true
@@ -65,6 +66,7 @@ const getExpectWorkingHour = (input: ParsedData, config?: any) => {
     config &&
     config[moment(input.date).format('M.D')] &&
     config[moment(input.date).format('M.D')]['workingHour'];
+
   let validWorkingHour;
   if (configValue) {
     validWorkingHour = Number(configValue) - getAbsentTime(input, config);
@@ -86,11 +88,9 @@ const getExpectWorkingHour = (input: ParsedData, config?: any) => {
 export const getOverTime = (input: ParsedData, config?: any) => {
   //最终的加班时间
   const ot = getDuration(input) - getExpectWorkingHour(input, config);
-  if (ot > 0) {
-    return ot;
-  }
+
   //加班时间<0, 大概率这一天缺勤了,而且没有请假
-  return 0;
+  return Math.max(0, ot);
 };
 
 export const toReadableString = (input: ParsedData, config: any) => {
@@ -125,14 +125,14 @@ export const toTableData = (input: ParsedData, config: any) => {
     overTime, //加班时间
   };
 };
-let ifDebug = false;
+let enableDebug = false;
 //获取日历上面的每一天的 dom
 const getDaysFromCald = () => {
   return Array.from(document.getElementsByClassName('flatpickr-day'));
 };
 
 const debug = (level: 'log' | 'warn' | 'error', ...args: any[]) => {
-  if (ifDebug) {
+  if (enableDebug) {
     console[level](...args);
   }
 };
@@ -143,12 +143,12 @@ const getActiveRecords = (targetDate: Date) => {
       const textContent = document.querySelector('#monthday')?.textContent;
       const status = document.querySelector('#week > span');
       //只有打卡状态时异常或者正常的才算获取到了结果
-      const hasStatus = () =>
-        status &&
+      const hasStatus = status &&
         (status.classList.contains('percheckq-normal') ||
           status.classList.contains('percheckq-abnormal'));
+
       //有打卡状态并且时间一致
-      if (textContent && hasStatus()) {
+      if (textContent && hasStatus) {
         return !moment(targetDate).isSame(moment(textContent, 'MM月DD日'));
       }
       return true;
@@ -230,7 +230,7 @@ export const run = (
     ['18:30', '19:30'],
   ]
 ) => {
-  ifDebug = _ifDebug;
+  enableDebug = _ifDebug;
   const currentDateStr = document.querySelector(
     'div.percheckq-left > div > div.flatpickr-month > span.flatpickr-current-month'
   )?.textContent;
