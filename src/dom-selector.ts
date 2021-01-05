@@ -149,7 +149,8 @@ const getActiveRecords = (targetDate: Date) => {
 
       //有打卡状态并且时间一致
       if (textContent && hasStatus) {
-        return !moment(targetDate).isSame(moment(textContent, 'MM月DD日'));
+        return moment(targetDate).format('MM月DD日') !== textContent
+        // return !moment(targetDate).isSame(moment(textContent, 'MM月DD日'));
       }
       return true;
     }),
