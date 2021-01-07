@@ -323,7 +323,7 @@ export const run = (
  *
  */
 const getFilterFnFromRange = (range?: { start: string; end: string }) => {
-	if(range){
+	if(range && range.start && range.end){
 		if(range.start.split('.').length !==  range.end.split('.').length){
 			throw new Error('开始格式和结束格式不一致. 允许的格式可以为:1991.10.1 或者 10.1. 如果省略年份将按照当前年处理')
 		}
