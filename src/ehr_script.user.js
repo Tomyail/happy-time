@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      0.16.2
+// @version      1.0.0
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
@@ -32,7 +32,7 @@
 // @require https://unpkg.com/@reactivex/rxjs@6.6.3/dist/global/rxjs.umd.js
 // @require https://code.jquery.com/jquery-1.9.1.min.js
 // @require https://cdn.jsdelivr.net/npm/moment@2.29.0/moment.min.js
-// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.4/dist/index.umd.js
+// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.5/dist/index.umd.js
 // ==/UserScript==
 
 (function () {
@@ -94,7 +94,7 @@
 
       console.log('%c🐂🍺 %s', css, '脚本注册完毕');
       colorLog(
-        '__ehr_summary("9.16","10.15")',
+        '__ehr_summary("2020.9.16","2020.10.15")',
         'green',
         '获取考情周期内的总工作时长',
         'red'

@@ -39,8 +39,8 @@ export const getDuration = (input: ParsedData) => {
 const getAbsentTime = (input: ParsedData, config?: any) => {
   const x =
     config &&
-    config[moment(input.date).format('M.D')] &&
-    config[moment(input.date).format('M.D')]['absentHour'];
+    config[moment(input.date).format('yyyy.M.D')] &&
+    config[moment(input.date).format('yyyy.M.D')]['absentHour'];
   return x ?? 0;
 };
 
@@ -56,7 +56,7 @@ const isWorkingDay = (
   }
 
   return excludeDay.reduce(
-    (acc, cur) => acc && moment(now, 'M.D').isoWeekday() !== cur,
+    (acc, cur) => acc && moment(now, 'yyyy.M.D').isoWeekday() !== cur,
     true
   );
 };
@@ -64,8 +64,8 @@ const isWorkingDay = (
 const getExpectWorkingHour = (input: ParsedData, config?: any) => {
   const configValue =
     config &&
-    config[moment(input.date).format('M.D')] &&
-    config[moment(input.date).format('M.D')]['workingHour'];
+    config[moment(input.date).format('yyyy.M.D')] &&
+    config[moment(input.date).format('yyyy.M.D')]['workingHour'];
 
   let validWorkingHour;
   if (configValue) {
@@ -73,7 +73,7 @@ const getExpectWorkingHour = (input: ParsedData, config?: any) => {
   } else {
     //先确定是否是工作日
     const _isWorkingDay = isWorkingDay(
-      moment(input.date).format('M.D'),
+      moment(input.date).format('yyyy.M.D'),
       [6, 7],
       config
     );
@@ -95,7 +95,7 @@ export const getOverTime = (input: ParsedData, config?: any) => {
 
 export const toReadableString = (input: ParsedData, config: any) => {
   return `${moment(input.date).format('yyyy.MM.DD')} 工作日?:${isWorkingDay(
-    moment(input.date).format('M.D'),
+    moment(input.date).format('yyyy.M.D'),
     [6, 7],
     config
   )} 工作时间 ${getDuration(input)} 小时 加班时间 ${getOverTime(
@@ -319,13 +319,28 @@ export const run = (
   return of(...currentMonthDays).pipe(concatAll());
 };
 
+/**
+ *
+ */
 const getFilterFnFromRange = (range?: { start: string; end: string }) => {
+	if(range){
+		if(range.start.split('.').length !==  range.end.split('.').length){
+			throw new Error('开始格式和结束格式不一致. 允许的格式可以为:1991.10.1 或者 10.1. 如果省略年份将按照当前年处理')
+		}
+
+		//说明只有月,那么补齐年
+		if(range.start.split('.').length === 2){
+		const year = new Date().getFullYear().toString();
+		range.start = `${year}.${range.start}`
+		range.end = `${year}.${range.end}`
+		}
+	}
   return range &&
-    moment(range.start, 'M.D').isSameOrBefore(moment(range.end, 'M.D'))
+    moment(range.start, 'yyyy.M.D').isSameOrBefore(moment(range.end, 'yyyy.M.D'))
     ? (item: ParsedData) => {
         return (
-          moment(item.date).isSameOrAfter(moment(range.start, 'M.D'), 'day') &&
-          moment(item.date).isSameOrBefore(moment(range.end, 'M.D'), 'day')
+          moment(item.date).isSameOrAfter(moment(range.start, 'yyyy.M.D'), 'day') &&
+          moment(item.date).isSameOrBefore(moment(range.end, 'yyyy.M.D'), 'day')
         );
       }
     : (item: ParsedData) => true;
@@ -416,13 +431,13 @@ export const getLeftWorkingDays = (
   excludeDay: number[] = [6, 7],
   config?: any
 ) => {
-  const leftDays = moment(end, 'M.D').diff(moment(now, 'M.D'), 'days', true);
+  const leftDays = moment(end, 'yyyy.M.D').diff(moment(now, 'yyyy.M.D'), 'days', true);
 
   let workingDays = 0;
   for (let i = 1; i <= leftDays; i++) {
     if (
       isWorkingDay(
-        moment(now, 'M.D').add(i, 'd').format('M.D'),
+        moment(now, 'yyyy.M.D').add(i, 'd').format('yyyy.M.D'),
         excludeDay,
         config
       )
