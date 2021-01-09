@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EHR_Happy_Time
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  自动获取 ehr 系统的工作时间
 // @author       tomyail
 // @match        *://*/*
@@ -32,7 +32,7 @@
 // @require https://unpkg.com/@reactivex/rxjs@6.6.3/dist/global/rxjs.umd.js
 // @require https://code.jquery.com/jquery-1.9.1.min.js
 // @require https://cdn.jsdelivr.net/npm/moment@2.29.0/moment.min.js
-// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.6/dist/index.umd.js
+// @require https://cdn.jsdelivr.net/npm/@tomyail/happy-time@1.3.7/dist/index.umd.js
 // ==/UserScript==
 
 (function () {

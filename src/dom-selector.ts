@@ -163,6 +163,11 @@ const getActiveRecords = (targetDate: Date) => {
       return Array.from(result ?? [])
         .map((item) => item.textContent)
         .filter((item) => item)
+        .reduce((acc,cur)=> {
+          //@ts-ignore
+          if(acc.indexOf(cur)<0) acc.push(cur);
+          return acc
+        },[])
         .map((item) => {
           const d = new Date(item!);
 
